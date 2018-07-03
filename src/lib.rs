@@ -12,15 +12,13 @@ pub mod i3 {
         #[serde(rename = "type")]
         pub type_con: Type,
         // pub current_border_width: i32,
-        pub layout: Layout,
+        // pub layout: Layout,
         // pub rect: Rect,
         pub focused: bool,
         // pub floating_nodes: Vec<Node>,
         pub window: Option<u64>,
         pub nodes: Vec<Node>,
     }
-
-
 
     #[derive(Serialize, Deserialize, Debug, Clone)]
     #[serde(rename_all = "snake_case")]
