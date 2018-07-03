@@ -19,23 +19,51 @@ fn main() {
 
     let nodes: Node = from_slice(&output.stdout).unwrap();
 
-    // Find Focused node
-    // let empty_node = Node {
-    //     name: Some(String::from("rip")),
-    //     type_con: Type::Root,
-    //     focused: false,
-    //     window: Some(0),
-    //     nodes: vec![],
-    // };
-
-    let ws = queued_ws(nodes);
-    println!("Got the workspace {:?}", ws)
     // From there find parent workspace
+    let ws = queued_ws(nodes);
 
-    // Build up focused array
+    // Build up array of windows on focused WS
+    let mut windows = flatten_children(ws);
+
+    // Sort the windows Highest to Lowest, then Left to Right
+    windows.sort_by(|a, b| a.rect.y.cmp(&b.rect.y));
+    windows.sort_by(|a, b| a.rect.x.cmp(&b.rect.x));
+
+    // Find the next in line (wrapping to front if last window)
+    let focused_index = windows.iter().position(|n| n.focused).unwrap();
+    let next = if focused_index < windows.len() - 1 {
+        windows.iter().nth(focused_index + 1).unwrap()
+    } else {
+        windows.iter().nth(0).unwrap()
+    };
+
+    // Send Message
+    Command::new("i3-msg")
+        .arg(format!("[con_id={}] focus", next.id))
+        .output();
+}
+
+fn flatten_children(ws: Node) -> Vec<Node> {
+    let mut children = vec![];
+    let mut queue: VecDeque<Node> = VecDeque::new();
+    queue.push_back(ws);
+    loop {
+        let this_node = queue.pop_back().unwrap();
+        for node in this_node.nodes.iter() {
+            match node {
+                Node { window: Some(_), ..} => {
+                    children.push(node.clone());
+                },
+                _ => queue.push_back(node.clone())
+            }
+        }
+        if queue.is_empty() { break; }
+    }
+    children
 }
 
 fn queued_ws(root: Node) -> Node{
+    // Lots of cloning, probably a better way to do this.
     let mut queue: VecDeque<Node> = VecDeque::new();
     let mut ws: Node = root.clone();
     queue.push_back(root);
@@ -46,14 +74,12 @@ fn queued_ws(root: Node) -> Node{
         }
         match this_node {
             Node { focused: true, ..} => {
-                println!("Focused Node: {:?}", this_node);
                 break;
             },
             Node { type_con: Type::Workspace, ..} => {
-                println!("Workspace Node {:?}", this_node);
                 ws = this_node
             },
-            _ => println!("Regular Node: {:?}", this_node),
+            _ => (),
         }
     }
     ws

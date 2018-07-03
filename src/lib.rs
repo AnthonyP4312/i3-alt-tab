@@ -8,12 +8,12 @@ pub mod i3 {
     #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Node {
         pub name: Option<String>,
-        // pub id: u64,
+        pub id: u64,
         #[serde(rename = "type")]
         pub type_con: Type,
         // pub current_border_width: i32,
         // pub layout: Layout,
-        // pub rect: Rect,
+        pub rect: Rect,
         pub focused: bool,
         // pub floating_nodes: Vec<Node>,
         pub window: Option<u64>,
@@ -42,12 +42,12 @@ pub mod i3 {
         Output
     }
 
-    #[derive(Serialize, Deserialize, Debug)]
+    #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Rect {
-        x: i32,
-        y: i32,
-        width: i32,
-        height: i32,
+        pub x: i32,
+        pub y: i32,
+        pub width: i32,
+        pub height: i32,
     }
 
 }
