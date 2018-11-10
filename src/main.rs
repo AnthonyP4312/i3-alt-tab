@@ -2,20 +2,45 @@ use std::collections::VecDeque;
 use std::env;
 use std::process::Command;
 
-extern crate alt_tabber;
+extern crate i3_alt_tab;
 extern crate serde_json;
+extern crate structopt;
 
-use alt_tabber::i3::{Node, Type};
+use i3_alt_tab::i3::{
+    WSOptions,
+    Direction,
+    Args,
+    Node,
+    Type,
+    Workspace,
+};
 use serde_json::from_slice;
+use Direction::*;
+use structopt::StructOpt;
 
 fn main() {
     // Pull our node tree from i3
+    let args = Args::from_args();
+    println!("{:?}", args);
+
+    // Pull node tree from i3
     let output = Command::new("i3-msg")
         .arg("-t")
         .arg("get_tree")
         .output()
         .unwrap();
     let nodes: Node = from_slice(&output.stdout).unwrap();
+
+
+    // Pull workspaces from i3
+    let output = Command::new("i3-msg")
+        .arg("-t")
+        .arg("get_workspaces")
+        .output()
+        .unwrap();
+    let workspaces: Vec<Workspace> = from_slice(&output.stdout).unwrap();
+    println!("{:?}", workspaces);
+
 
     // From there find parent workspace
     let ws = queued_ws2(&nodes).unwrap();
@@ -71,7 +96,7 @@ fn flatten_children(ws: &Node) -> Vec<&Node> {
 #[cfg(test)]
 mod test_flatten {
     use super::*;
-    use alt_tabber::i3::Rect;
+    use i3_alt_tab::i3::Rect;
     fn setup() {
         let child_a = Node {
             name: Some(String::from("child_a")),
