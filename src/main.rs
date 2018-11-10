@@ -9,12 +9,12 @@ use alt_tabber::i3::{Node, Type};
 use serde_json::from_slice;
 
 fn main() {
+    // Pull our node tree from i3
     let output = Command::new("i3-msg")
         .arg("-t")
         .arg("get_tree")
         .output()
         .unwrap();
-
     let nodes: Node = from_slice(&output.stdout).unwrap();
 
     // From there find parent workspace
