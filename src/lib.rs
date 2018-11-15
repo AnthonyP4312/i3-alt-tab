@@ -12,7 +12,6 @@ use structopt::StructOpt;
 
 pub mod i3 {
 
-    #[derive(Serialize, Deserialize, Debug, Clone)]
     #[derive(Deserialize, Debug, Clone)]
     pub struct Node {
         pub name: Option<String>,
@@ -26,6 +25,7 @@ pub mod i3 {
         // pub floating_nodes: Vec<Node>,
         pub window: Option<u64>,
         pub nodes: Vec<Node>,
+        pub num: Option<i32>,
     }
 
     #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -60,7 +60,7 @@ pub mod i3 {
 
     #[derive(Deserialize, Debug)]
     pub struct Workspace {
-        pub num: i8,
+        pub num: i32,
         pub visible: bool,
         pub focused: bool,
         pub rect: Rect,
@@ -91,7 +91,8 @@ pub mod i3 {
     #[derive(StructOpt, Debug)]
     #[structopt(name = "i3-alt-tab")]
     pub struct Args {
-        /// The workspaces to include for tabbing (visible, focused, or all)
+        /// The workspaces to include for tabbing
+        /// (visible, focused, or all)
         #[structopt(short = "w", long = "workspaces")]
         pub workspaces: WSOptions,
 

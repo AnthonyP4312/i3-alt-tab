@@ -1,0 +1,10 @@
+Put a gif here of it working
+
+* Installation
+
+** Git
+
+** Arch Linux
+
+
+* Usage
