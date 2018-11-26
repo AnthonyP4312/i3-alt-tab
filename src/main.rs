@@ -5,7 +5,7 @@ extern crate i3_alt_tab;
 extern crate serde_json;
 extern crate structopt;
 
-use i3_alt_tab::i3::{Args, Direction, Node, Type, WSOptions, Workspace};
+use i3_alt_tab::i3::{Args, Direction, Node, WSOptions, Workspace};
 use serde_json::from_slice;
 use structopt::StructOpt;
 use Direction::*;
@@ -30,18 +30,18 @@ fn main() {
         .unwrap();
 
     // Dream of function composition
-    let workspaces: Vec<Workspace> = from_slice(&output.stdout).unwrap();
-    let workspaces: Vec<i32> = select_workspaces(&args, workspaces);
-    let workspaces: Vec<&Node> = find_wss(workspaces, &nodes);
+    let workspaces = from_slice(&output.stdout).unwrap();
+    let workspaces = select_workspaces(&args, workspaces);
+    let workspaces = find_wss(workspaces, &nodes);
 
     // Flatten together all the windows under these workspaces
-    let mut windows: Vec<&Node> = workspaces
+    let windows: Vec<&Node> = workspaces
         .into_iter()
-        .map(flatten_children)
+        .map(|ws| flatten_children(&ws, args.floating))
         .map(|mut w| {
             // Sort the windows Highest to Lowest, then Left to Right
-            w.sort_by(|a, b| a.rect.x.cmp(&b.rect.x));
             w.sort_by(|a, b| a.rect.y.cmp(&b.rect.y));
+            w.sort_by(|a, b| a.rect.x.cmp(&b.rect.x));
             w
         })
         .flatten()
@@ -63,8 +63,7 @@ fn main() {
         .unwrap();
 }
 
-/// Based on the choice for workspaces filter down the workspaces
-/// to a list of numbers
+/// Based on the choice for workspaces filter down the workspaces to a list of numbers
 fn select_workspaces(args: &Args, workspaces: Vec<Workspace>) -> Vec<i32> {
     let ws = workspaces.into_iter();
     let result: Vec<Workspace> = match args.workspaces {
@@ -76,12 +75,15 @@ fn select_workspaces(args: &Args, workspaces: Vec<Workspace>) -> Vec<i32> {
     result.into_iter().map(|w| w.num).collect()
 }
 
-fn flatten_children(ws: &Node) -> Vec<&Node> {
+/// Given an i3 node, flatten its child windows into an array, optionally including floating windows
+fn flatten_children(ws: &Node, float: bool) -> Vec<&Node> {
     let mut children = vec![];
     let mut queue: VecDeque<&Node> = VecDeque::new();
     queue.push_back(ws);
     loop {
         let this_node = queue.pop_back().unwrap();
+
+        // Process this nodes children
         for node in this_node.nodes.iter() {
             match node {
                 Node {
@@ -90,6 +92,19 @@ fn flatten_children(ws: &Node) -> Vec<&Node> {
                 _ => queue.push_back(node),
             }
         }
+
+        // Process Floating nodes if enabled
+        if float {
+            for node in this_node.floating_nodes.iter() {
+                match node {
+                    Node {
+                        window: Some(_), ..
+                    } => children.push(node),
+                    _ => queue.push_back(node),
+                }
+            }
+        }
+
         if queue.is_empty() {
             break;
         }

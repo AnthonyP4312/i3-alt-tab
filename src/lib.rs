@@ -25,6 +25,7 @@ pub mod i3 {
         // pub floating_nodes: Vec<Node>,
         pub window: Option<u64>,
         pub nodes: Vec<Node>,
+        pub floating_nodes: Vec<Node>,
         pub num: Option<i32>,
     }
 
