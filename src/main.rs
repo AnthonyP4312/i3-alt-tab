@@ -28,6 +28,8 @@ fn main() {
         .arg("get_workspaces")
         .output()
         .unwrap();
+
+    // Dream of function composition
     let workspaces: Vec<Workspace> = from_slice(&output.stdout).unwrap();
     let workspaces: Vec<i32> = select_workspaces(&args, workspaces);
     let workspaces: Vec<&Node> = find_wss(workspaces, &nodes);
@@ -37,6 +39,7 @@ fn main() {
         .into_iter()
         .map(flatten_children)
         .map(|mut w| {
+            // Sort the windows Highest to Lowest, then Left to Right
             w.sort_by(|a, b| a.rect.x.cmp(&b.rect.x));
             w.sort_by(|a, b| a.rect.y.cmp(&b.rect.y));
             w
@@ -44,12 +47,8 @@ fn main() {
         .flatten()
         .collect();
 
-    // Sort the windows Highest to Lowest, then Left to Right
-    // windows.sort_by(|a, b| a.rect.x.cmp(&b.rect.x));
-    // windows.sort_by(|a, b| a.rect.y.cmp(&b.rect.y));
-
     // Find the next in line (wrapping to front if last window)
-    let focused_index = windows.iter().position(|n| n.focused).unwrap();
+    let focused_index = windows.iter().position(|n| n.focused).unwrap_or_else(|| 0);
     let next = match args.direction {
         Left if focused_index == 0 => windows.iter().last().unwrap(),
         Left => windows.iter().nth(focused_index - 1).unwrap(),
