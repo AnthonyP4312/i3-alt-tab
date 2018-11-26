@@ -71,10 +71,10 @@ pub mod i3 {
 
     #[derive(EnumString, Debug)]
     pub enum Direction {
-        #[strum(serialize="right")]
-        Right,
-        #[strum(serialize="left")]
-        Left,
+        #[strum(serialize="forward")]
+        Forward,
+        #[strum(serialize="back")]
+        Back,
     }
 
     #[derive(EnumString, Debug)]
@@ -88,7 +88,7 @@ pub mod i3 {
     }
 
     /// A less pedantic window focusing strategy. Command will focus
-    /// windows in a right->down or left->up fashion.
+    /// windows in a down->right or up->left fashion.
     #[derive(StructOpt, Debug)]
     #[structopt(name = "i3-alt-tab")]
     pub struct Args {
@@ -97,7 +97,7 @@ pub mod i3 {
         #[structopt(short = "w", long = "workspaces")]
         pub workspaces: WSOptions,
 
-        /// The direction to look for the next window
+        /// The direction to look for the next window (forward | back)
         #[structopt(short="d", long="direction")]
         pub direction: Direction,
 

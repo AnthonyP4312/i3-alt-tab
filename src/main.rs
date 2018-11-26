@@ -50,10 +50,10 @@ fn main() {
     // Find the next in line (wrapping to front if last window)
     let focused_index = windows.iter().position(|n| n.focused).unwrap_or_else(|| 0);
     let next = match args.direction {
-        Left if focused_index == 0 => windows.iter().last().unwrap(),
-        Left => windows.iter().nth(focused_index - 1).unwrap(),
-        Right if focused_index + 1 == windows.len() => windows[0],
-        Right => windows.iter().nth(focused_index + 1).unwrap(),
+        Back if focused_index == 0 => windows.iter().last().unwrap(),
+        Back => windows.iter().nth(focused_index - 1).unwrap(),
+        Forward if focused_index + 1 == windows.len() => windows[0],
+        Forward => windows.iter().nth(focused_index + 1).unwrap(),
     };
 
     // Send Message
