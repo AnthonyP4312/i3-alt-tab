@@ -53,8 +53,8 @@ pub mod i3 {
 
     #[derive(Serialize, Deserialize, Debug, Clone)]
     pub struct Rect {
-        pub x: i32,
-        pub y: i32,
+        pub x: i64,
+        pub y: i64,
         pub width: i32,
         pub height: i32,
     }
